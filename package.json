@@ -1,0 +1,20 @@
+{
+  "name": "reminders-javascript",
+  "version": "1.0.0",
+  "description": "Reminders application implemented in Node using javascript and express",
+  "main": "index.js",
+  "scripts": {
+    "test": "mocha test/",
+    "start": "node src/index.js"
+  },
+  "author": "Krzysztof Mejka",
+  "license": "ISC",
+  "dependencies": {
+    "express": "^4.13.3",
+    "node-uuid": "^1.4.3",
+    "restify": "^4.0.2"
+  },
+  "devDependencies": {
+    "mocha": "^2.3.2"
+  }
+}
