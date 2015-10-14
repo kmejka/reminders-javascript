@@ -1,23 +1,27 @@
 var uuid = require('node-uuid');
 var utils = require('./utils');
-// var log //todo!!!
+var Logger = require('bunyan');
+var log = new Logger({name: 'reminderService', streams: [{stream: process.stdout, level: 'debug'}, {path: 'service.log', level: 'info'}]});
+
 var dataStore = {};
 
 function getAllUsers() {
-    return dataStore;
+    return;
 }
 
 function returnAll() {
-    return dataStore;
+    return;
 }
 
 function getReminderById(userId, reminderId, callback) {
-    console.log(dataStore);
+    log.info("filtering reminders for user: %s, reminderId: %s", userId, reminderId);
+    log.debug("dataStore", dataStore);
 
     if (dataStore.hasOwnProperty(userId)) {
         var reminders = dataStore[userId].filter(function(item) {
                 return item.id === reminderId;
             });
+        log.debug("reminders after filtering:", reminders);
         callback(utils.findFirst(reminders));
     } else {
         callback();
@@ -25,7 +29,8 @@ function getReminderById(userId, reminderId, callback) {
 }
 
 function getRemindersForUser(userId, callback) {
-    console.log(dataStore);
+    log.info("filtering reminders for user: %s", userId);
+    log.debug("dataStore", dataStore);
 
     if (dataStore.hasOwnProperty(userId)) {
         callback(dataStore[userId]);
@@ -35,7 +40,8 @@ function getRemindersForUser(userId, callback) {
 }
 
 function addReminderForUser(userId, reminder, callback) {
-    console.log(dataStore);
+    log.info("storing reminder for user: %s, reminder:", userId, reminder);
+    log.debug("dataStore", dataStore);
 
     if (!reminder.hasOwnProperty("title")) {
         callback("Reminder has no title set", null);

@@ -10,6 +10,8 @@
   "author": "Krzysztof Mejka",
   "license": "ISC",
   "dependencies": {
+    "bunyan": "^1.5.1",
+    "cron": "^1.0.9",
     "express": "^4.13.3",
     "node-uuid": "^1.4.3",
     "restify": "^4.0.2"

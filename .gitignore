@@ -2,3 +2,6 @@
 .idea/
 node_modules/
 worksheet/
+*.log
+*.sublime-project
+*.sublime-workspace

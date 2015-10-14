@@ -1,14 +1,29 @@
 var restify = require('restify');
-var remindersService = require('./remindersService');
+var remindersDao = require('./remindersDao');
+var Logger = require('bunyan');
+var log = new Logger({name: 'remindersEndpoint', streams: [{stream: process.stdout, level: 'debug'}, {path: 'service.log', level: 'info'}]});
 
-var server = restify.createServer();
+var server = restify.createServer({
+    name: 'Reminders service',
+    log: log
+});
+
 server.pre(restify.pre.userAgentConnection());
+
+server.pre(function(req, res, next) {
+    req.log.info({request: req}, 'received request');
+    next();
+});
+
+server.on('after', function(req, res, route) {
+    req.log.info({response: res}, 'returning response');
+});
+
 server.use(restify.acceptParser(server.acceptable));
 server.use(restify.bodyParser());
 
 
 server.get('/', function (req, res, next) {
-    console.log('Received call for root path with content-type'+req.header('content-type'));
     
     res.send('Reminders service');
     next();
@@ -22,10 +37,9 @@ server.get('/users/', function(req, res, next) {
 });
 
 server.get('/users/:userId/reminders', function(req, res, next) {
-    console.log('Received get all user reminders with userId: %s', req.params.userId);
     
     var userId = req.params.userId;
-    remindersService.getRemindersForUser(userId, function(reminders) {
+    remindersDao.getRemindersForUser(userId, function(reminders) {
         if (reminders !== undefined) {
             res.send(200, reminders);
         } else {
@@ -36,11 +50,10 @@ server.get('/users/:userId/reminders', function(req, res, next) {
 });
 
 server.get('/users/:userId/reminders/:reminderId', function(req, res, next) {
-    console.log('Received get user specific reminder with userId: %s reminderId: %s', req.params.userId, req.params.reminderId);
 
     var userId = req.params.userId;
     var reminderId = req.params.reminderId;
-    remindersService.getReminderById(userId, reminderId, function(reminder) {
+    remindersDao.getReminderById(userId, reminderId, function(reminder) {
         if (reminder !== undefined) {
             res.send(200, reminder);
         } else {
@@ -51,7 +64,6 @@ server.get('/users/:userId/reminders/:reminderId', function(req, res, next) {
 });
 
 server.post('/users/:userId/reminders', function(req, res, next) {
-    console.log('Received post with new reminder with userId: %s body: %s', req.params.userId, req.body);
 
     if (!req.is('json')) {
         return next(new restify.InvalidContentError("Application only accepts 'application/json' content-type"));
@@ -61,7 +73,7 @@ server.post('/users/:userId/reminders', function(req, res, next) {
     }
 
     var userId = req.params.userId;
-    remindersService.addReminderForUser(userId, req.body, function(err, reminder) {
+    remindersDao.addReminderForUser(userId, req.body, function(err, reminder) {
         if (err) {
             return next(new restify.BadRequestError(err));
         }
@@ -75,7 +87,6 @@ server.post('/users/:userId/reminders', function(req, res, next) {
 server.listen('8080', function() {
     var host = server.address().address;
     var port = server.address().port;
-
-    console.log("running at host " + host + " port " + port);
+    log.info("server started at host: %s, port: %s", host, port);
 });
 
